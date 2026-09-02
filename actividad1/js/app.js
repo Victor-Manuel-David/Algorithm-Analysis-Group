@@ -66,6 +66,7 @@
 
     function removeDelivery(id) {
       state.deliveries = state.deliveries.filter((delivery) => delivery.id !== id);
+      deliveryManager.showFormError(elements.formError, '');
       recalculate(false);
     }
 
