@@ -16,10 +16,11 @@
     const data = global.RutaExpressData;
     const greedy = global.RutaExpressGreedy;
     const bruteForce = global.RutaExpressBruteForce;
+    const multiRoute = global.RutaExpressMultiRoute;
     const deliveryManager = global.RutaExpressDeliveryManager;
     const visualization = global.RutaExpressVisualization;
 
-    if (!data || !greedy || !bruteForce || !deliveryManager || !visualization) {
+    if (!data || !greedy || !bruteForce || !multiRoute || !deliveryManager || !visualization) {
       throw new Error('No fue posible cargar todos los módulos de RutaExpress.');
     }
 
@@ -35,6 +36,9 @@
       nextButton: document.querySelector('#next-step'),
       svg: document.querySelector('#route-svg'),
       mapStatus: document.querySelector('#map-status'),
+      legend: document.querySelector('#map-legend'),
+      metricLabelDistance: document.querySelector('#metric-label-distance'),
+      metricLabelCount: document.querySelector('#metric-label-count'),
       shownDistance: document.querySelector('#shown-distance'),
       visibleCount: document.querySelector('#visible-count'),
       totalCount: document.querySelector('#total-count'),
@@ -45,12 +49,17 @@
       greedyDistance: document.querySelector('#greedy-distance'),
       optimalDistance: document.querySelector('#optimal-distance'),
       comparisonSummary: document.querySelector('#comparison-summary'),
+      driverCountInput: document.querySelector('#driver-count'),
+      generateMultiRouteButton: document.querySelector('#generate-multi-route'),
+      multiRouteError: document.querySelector('#multi-route-error'),
     };
 
     const state = {
       deliveries: copySampleDeliveries(data.SAMPLE_DELIVERIES),
       plan: greedy.buildGreedyRoute(data.DEPOT, data.SAMPLE_DELIVERIES),
       visibleSteps: data.SAMPLE_DELIVERIES.length,
+      mode: 'single',
+      multiRoutes: [],
     };
 
     function render() {
@@ -58,15 +67,23 @@
       elements.depotName.textContent = data.DEPOT.name;
       elements.depotCoordinates.textContent = `Inicio · (${data.DEPOT.x}, ${data.DEPOT.y})`;
       elements.calculateButton.disabled = state.deliveries.length === 0;
+      elements.generateMultiRouteButton.disabled = state.deliveries.length === 0;
 
       deliveryManager.renderDeliveryList(elements.deliveryList, state.deliveries, removeDelivery);
-      visualization.renderRouteMap(elements, data.DEPOT, state.deliveries, state.plan, state.visibleSteps);
+
+      if (state.mode === 'multi') {
+        visualization.renderMultiRouteMap(elements, data.DEPOT, state.multiRoutes);
+      } else {
+        visualization.renderRouteMap(elements, data.DEPOT, state.deliveries, state.plan, state.visibleSteps);
+      }
+
       visualization.renderRouteSteps(elements, state.plan, state.visibleSteps);
     }
 
     function recalculate(showOnlyFirstStep) {
       state.plan = greedy.buildGreedyRoute(data.DEPOT, state.deliveries);
       state.visibleSteps = showOnlyFirstStep && state.plan.steps.length > 0 ? 1 : state.plan.steps.length;
+      state.mode = 'single';
       render();
     }
 
@@ -125,6 +142,20 @@
         difference <= 0.001
           ? 'Greedy encontró la ruta óptima en este caso.'
           : `Greedy recorre ${visualization.formatDistance(difference)} unidades más que la ruta óptima.`;
+    });
+
+    elements.generateMultiRouteButton.addEventListener('click', () => {
+      const driverCount = Number(elements.driverCountInput.value);
+
+      if (!Number.isInteger(driverCount) || driverCount < 1) {
+        elements.multiRouteError.textContent = 'Ingresa un número entero de repartidores mayor o igual a 1.';
+        return;
+      }
+
+      elements.multiRouteError.textContent = '';
+      state.multiRoutes = multiRoute.buildMultiRoute(data.DEPOT, state.deliveries, driverCount);
+      state.mode = 'multi';
+      render();
     });
 
     render();

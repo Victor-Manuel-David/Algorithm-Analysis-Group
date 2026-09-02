@@ -497,6 +497,8 @@ button:disabled {
 
 .legend {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 8px;
   color: var(--muted-text);
   font-size: 11px;
@@ -689,6 +691,17 @@ button:disabled {
   color: var(--muted-text);
   font-size: 13px;
   line-height: 1.6;
+}
+
+.multi-route-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.multi-route-form .field {
+  flex: 1;
 }
 
 .summary-card {

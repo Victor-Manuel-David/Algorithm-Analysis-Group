@@ -12,6 +12,7 @@
     <script src="js/data.js" defer></script>
     <script src="js/greedy.js" defer></script>
     <script src="js/brute-force.js" defer></script>
+    <script src="js/multi-route.js" defer></script>
     <script src="js/delivery-manager.js" defer></script>
     <script src="js/route-visualization.js" defer></script>
     <script src="js/app.js" defer></script>
@@ -96,6 +97,17 @@
                 ↻
               </button>
             </div>
+
+            <div class="multi-route-form">
+              <label class="field" for="driver-count">
+                Repartidores
+                <input id="driver-count" name="driverCount" type="number" min="1" value="1" />
+              </label>
+              <button id="generate-multi-route" class="button button-outline" type="button">
+                <span aria-hidden="true">⇢</span> Generar rutas
+              </button>
+            </div>
+            <p id="multi-route-error" class="form-error" role="alert" aria-live="polite"></p>
           </article>
 
           <article class="algorithm-card">
@@ -117,7 +129,7 @@
                 <p class="eyebrow">2 · Visualización</p>
                 <h2>Mapa de decisiones</h2>
               </div>
-              <div class="legend" aria-label="Leyenda del mapa">
+              <div id="map-legend" class="legend" aria-label="Leyenda del mapa">
                 <span><i class="legend-dot depot-dot"></i> Inicio</span>
                 <span><i class="legend-dot delivery-dot"></i> Entrega</span>
               </div>
@@ -130,11 +142,11 @@
 
             <div class="metrics">
               <div>
-                <small>Distancia mostrada</small>
+                <small id="metric-label-distance">Distancia mostrada</small>
                 <strong><span id="shown-distance">0,0</span> <em>unid.</em></strong>
               </div>
               <div>
-                <small>Decisiones</small>
+                <small id="metric-label-count">Decisiones</small>
                 <strong><span id="visible-count">0</span> <em>/ <span id="total-count">0</span></em></strong>
               </div>
             </div>

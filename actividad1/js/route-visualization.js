@@ -2,9 +2,37 @@
   'use strict';
 
   const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+  const DEFAULT_ROUTE_COLOR = '#4a4fc4';
+  const DRIVER_COLORS = ['#4a4fc4', '#c8763f', '#3f9a5c', '#a53f9a', '#3f8ea5', '#a5763f', '#8a3fa5', '#3fa591'];
 
   function formatDistance(value) {
     return value.toFixed(1).replace('.', ',');
+  }
+
+  function createLegendItem(color, label) {
+    const item = document.createElement('span');
+    const dot = document.createElement('i');
+    dot.className = 'legend-dot';
+    dot.style.background = color;
+    item.append(dot, ` ${label}`);
+    return item;
+  }
+
+  function renderDefaultLegend(legendElement) {
+    legendElement.replaceChildren(
+      createLegendItem('#20243b', 'Inicio'),
+      createLegendItem(DEFAULT_ROUTE_COLOR, 'Entrega'),
+    );
+  }
+
+  function renderDriverLegend(legendElement, routes) {
+    const items = routes.map((route, index) =>
+      createLegendItem(
+        DRIVER_COLORS[index % DRIVER_COLORS.length],
+        `Repartidor ${route.driver} · ${formatDistance(route.totalDistance)} unid.`,
+      ),
+    );
+    legendElement.replaceChildren(...items);
   }
 
   function createSvgElement(tagName, attributes) {
@@ -42,14 +70,15 @@
     svg.append(group);
   }
 
-  function drawDelivery(svg, delivery, order, visited) {
+  function drawDelivery(svg, delivery, order, visited, color) {
+    const routeColor = color || DEFAULT_ROUTE_COLOR;
     const group = createSvgElement('g', {});
     const point = createSvgElement('circle', {
       cx: delivery.x,
       cy: delivery.y,
       r: 4,
-      fill: visited ? '#4a4fc4' : '#ffffff',
-      stroke: '#4a4fc4',
+      fill: visited ? routeColor : '#ffffff',
+      stroke: routeColor,
       'stroke-width': 1,
     });
     const label = createSvgElement('text', {
@@ -58,7 +87,7 @@
       'text-anchor': 'middle',
       'font-size': 3.7,
       'font-weight': 900,
-      fill: visited ? '#ffffff' : '#4a4fc4',
+      fill: visited ? '#ffffff' : routeColor,
     });
     const title = createSvgElement('title', {});
 
@@ -96,6 +125,8 @@
       drawDelivery(elements.svg, delivery, routeOrder.get(delivery.id), visitedIds.has(delivery.id));
     });
 
+    elements.metricLabelDistance.textContent = 'Distancia mostrada';
+    elements.metricLabelCount.textContent = 'Decisiones';
     elements.shownDistance.textContent = formatDistance(shownDistance);
     elements.visibleCount.textContent = visibleSteps;
     elements.totalCount.textContent = plan.steps.length;
@@ -103,6 +134,53 @@
       visibleSteps === plan.steps.length
         ? 'Ruta completa'
         : `Mostrando ${visibleSteps} de ${plan.steps.length} decisiones`;
+    renderDefaultLegend(elements.legend);
+  }
+
+  /**
+   * Dibuja una ruta Greedy independiente por repartidor, cada una en un
+   * color distinto, para comparar visualmente cómo queda el reparto.
+   */
+  function renderMultiRouteMap(elements, depot, routes) {
+    elements.svg.replaceChildren();
+
+    let combinedDistance = 0;
+    let totalDeliveries = 0;
+
+    routes.forEach((route, index) => {
+      const color = DRIVER_COLORS[index % DRIVER_COLORS.length];
+      combinedDistance += route.totalDistance;
+      totalDeliveries += route.orderedStops.length;
+
+      route.steps.forEach((step) => {
+        const line = createSvgElement('line', {
+          class: 'route-line',
+          x1: step.from.x,
+          y1: step.from.y,
+          x2: step.to.x,
+          y2: step.to.y,
+          stroke: color,
+          'stroke-width': 1.3,
+          'stroke-linecap': 'round',
+          pathLength: 160,
+        });
+        elements.svg.append(line);
+      });
+
+      route.orderedStops.forEach((stop, stopIndex) => {
+        drawDelivery(elements.svg, stop, stopIndex + 1, true, color);
+      });
+    });
+
+    drawDepot(elements.svg, depot);
+
+    elements.metricLabelDistance.textContent = 'Distancia combinada';
+    elements.metricLabelCount.textContent = 'Repartidores';
+    elements.shownDistance.textContent = formatDistance(combinedDistance);
+    elements.visibleCount.textContent = routes.length;
+    elements.totalCount.textContent = totalDeliveries;
+    elements.mapStatus.textContent = `${routes.length} repartidores · ${totalDeliveries} entregas`;
+    renderDriverLegend(elements.legend, routes);
   }
 
   function createStepItem(step) {
@@ -183,5 +261,6 @@
     formatDistance,
     renderRouteMap,
     renderRouteSteps,
+    renderMultiRouteMap,
   });
 })(window);
