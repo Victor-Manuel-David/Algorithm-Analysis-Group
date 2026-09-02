@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Esta aplicación construye una ruta de entregas implementando el algoritmo Greedy del vecino más cercano."
+    />
+    <title>RutaExpress</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <script src="js/data.js" defer></script>
+    <script src="js/greedy.js" defer></script>
+    <script src="js/delivery-manager.js" defer></script>
+    <script src="js/route-visualization.js" defer></script>
+    <script src="js/app.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-content">
+        <a class="brand" href="#inicio" aria-label="Ir al inicio de RutaExpress">
+          <span class="brand-icon" aria-hidden="true">↗</span>
+          <span>
+            <strong>RutaExpress</strong>
+          </span>
+        </a>
+        <span class="academic-badge"><span aria-hidden="true">✦</span> Proyecto académico</span>
+      </div>
+    </header>
+
+    <main id="inicio">
+      <section class="intro" aria-labelledby="main-title">
+        <p class="eyebrow">Algoritmo Greedy · Vecino más cercano</p>
+        <h1 id="main-title">Una ruta útil, decisión por decisión.</h1>
+        <p class="intro-copy">
+          Agrega destinos, calcula la ruta y observa cómo el algoritmo siempre elige la entrega
+          pendiente más cercana a su posición actual.
+        </p>
+      </section>
+
+      <section class="planner" aria-label="Planificador de entregas">
+        <div class="planner-column">
+          <article class="panel input-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">1 · Datos de entrada</p>
+                <h2>Entregas pendientes</h2>
+              </div>
+              <span id="delivery-count" class="counter" aria-label="Cantidad de entregas">0</span>
+            </div>
+
+            <div class="depot-card">
+              <span class="depot-icon" aria-hidden="true">▦</span>
+              <span>
+                <strong id="depot-name">Centro logístico</strong>
+                <small id="depot-coordinates">Inicio · (12, 52)</small>
+              </span>
+            </div>
+
+            <ul id="delivery-list" class="delivery-list" aria-label="Lista de entregas"></ul>
+
+            <form id="delivery-form" class="delivery-form" novalidate>
+              <h3>Agregar destino</h3>
+              <div class="form-grid">
+                <label class="field field-name" for="delivery-name">
+                  Nombre
+                  <input
+                    id="delivery-name"
+                    name="name"
+                    type="text"
+                    placeholder="Ej. Panadería Sol"
+                    autocomplete="off"
+                  />
+                </label>
+                <label class="field" for="delivery-x">
+                  X (0–100)
+                  <input id="delivery-x" name="x" type="number" min="0" max="100" placeholder="45" />
+                </label>
+                <label class="field" for="delivery-y">
+                  Y (0–100)
+                  <input id="delivery-y" name="y" type="number" min="0" max="100" placeholder="70" />
+                </label>
+              </div>
+              <p id="form-error" class="form-error" role="alert" aria-live="polite"></p>
+              <button class="button button-secondary button-full" type="submit">
+                <span aria-hidden="true">＋</span> Agregar entrega
+              </button>
+            </form>
+
+            <div class="action-row">
+              <button id="calculate-route" class="button button-primary" type="button">
+                <span aria-hidden="true">⌁</span> Calcular ruta Greedy
+              </button>
+              <button id="reset-example" class="button button-outline icon-button" type="button" aria-label="Restaurar ejemplo">
+                ↻
+              </button>
+            </div>
+          </article>
+
+          <article class="algorithm-card">
+            <p class="eyebrow light">La regla voraz</p>
+            <h2>Elegir lo mejor disponible ahora</h2>
+            <ol>
+              <li><span>01</span> Calcular la distancia a todas las entregas pendientes.</li>
+              <li><span>02</span> Elegir la más cercana y convertirla en la ubicación actual.</li>
+              <li><span>03</span> Repetir hasta visitar todos los destinos.</li>
+            </ol>
+            <code>mientras queden entregas → buscar la mínima distancia → visitar → repetir</code>
+          </article>
+        </div>
+
+        <div class="planner-column">
+          <article class="panel map-panel">
+            <div class="panel-heading map-heading">
+              <div>
+                <p class="eyebrow">2 · Visualización</p>
+                <h2>Mapa de decisiones</h2>
+              </div>
+              <div class="legend" aria-label="Leyenda del mapa">
+                <span><i class="legend-dot depot-dot"></i> Inicio</span>
+                <span><i class="legend-dot delivery-dot"></i> Entrega</span>
+              </div>
+            </div>
+
+            <figure class="map-canvas" aria-label="Mapa cartesiano de la ruta">
+              <svg id="route-svg" viewBox="0 0 100 100" aria-hidden="true"></svg>
+              <figcaption id="map-status" class="map-status">Ruta completa</figcaption>
+            </figure>
+
+            <div class="metrics">
+              <div>
+                <small>Distancia mostrada</small>
+                <strong><span id="shown-distance">0,0</span> <em>unid.</em></strong>
+              </div>
+              <div>
+                <small>Decisiones</small>
+                <strong><span id="visible-count">0</span> <em>/ <span id="total-count">0</span></em></strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel steps-panel">
+            <div class="panel-heading steps-heading">
+              <div>
+                <p class="eyebrow">3 · Evidencia del algoritmo</p>
+                <h2>Decisiones paso a paso</h2>
+              </div>
+              <button id="next-step" class="button button-secondary" type="button">
+                <span aria-hidden="true">▶</span> Siguiente decisión
+              </button>
+            </div>
+            <ol id="route-steps" class="route-steps"></ol>
+            <div id="route-summary" class="route-summary" aria-live="polite"></div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
