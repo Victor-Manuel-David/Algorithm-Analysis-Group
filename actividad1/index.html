@@ -84,11 +84,16 @@
                 </label>
               </div>
               <p id="form-error" class="form-error" role="alert" aria-live="polite"></p>
-              <button class="button button-secondary button-full" type="submit">
-                <span aria-hidden="true">＋</span> Agregar entrega
-              </button>
+              <div class="form-actions-row">
+                <button class="button button-secondary" type="submit">
+                  <span aria-hidden="true">＋</span> Agregar entrega
+                </button>
+                <button id="randomize-deliveries" class="button button-secondary" type="button">
+                  <span aria-hidden="true">🎲</span> Generar caso aleatorio
+                </button>
+              </div>
             </form>
-
+              
             <div class="action-row">
               <button id="calculate-route" class="button button-primary" type="button">
                 <span aria-hidden="true">⌁</span> Calcular ruta Greedy

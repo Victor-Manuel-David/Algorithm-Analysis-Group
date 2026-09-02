@@ -439,6 +439,12 @@ button:disabled {
   background: rgba(200, 63, 73, 0.08);
 }
 
+.form-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
 .action-row {
   display: grid;
   grid-template-columns: 1fr auto;
