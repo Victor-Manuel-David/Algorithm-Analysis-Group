@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="css/styles.css" />
     <script src="js/data.js" defer></script>
     <script src="js/greedy.js" defer></script>
+    <script src="js/brute-force.js" defer></script>
     <script src="js/delivery-manager.js" defer></script>
     <script src="js/route-visualization.js" defer></script>
     <script src="js/app.js" defer></script>
@@ -151,6 +152,32 @@
             </div>
             <ol id="route-steps" class="route-steps"></ol>
             <div id="route-summary" class="route-summary" aria-live="polite"></div>
+          </article>
+
+          <article class="panel comparison-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">4 · Comparación con el óptimo</p>
+                <h2>Greedy vs. fuerza bruta</h2>
+              </div>
+              <button id="compare-optimal" class="button button-secondary" type="button">
+                <span aria-hidden="true">⇄</span> Comparar
+              </button>
+            </div>
+
+            <div id="comparison-result" class="comparison-result" hidden>
+              <div class="metrics">
+                <div>
+                  <small>Greedy</small>
+                  <strong><span id="greedy-distance">0,0</span> <em>unid.</em></strong>
+                </div>
+                <div>
+                  <small>Óptimo (fuerza bruta)</small>
+                  <strong><span id="optimal-distance">0,0</span> <em>unid.</em></strong>
+                </div>
+              </div>
+              <p id="comparison-summary" class="comparison-summary"></p>
+            </div>
           </article>
         </div>
       </section>
