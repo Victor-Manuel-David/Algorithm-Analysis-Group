@@ -12,6 +12,16 @@
     return sampleDeliveries.map((delivery) => ({ ...delivery }));
   }
 
+  function generateRandomDeliveries(count) {
+    const names = ['Punto A', 'Punto B', 'Punto C', 'Punto D', 'Punto E', 'Punto F', 'Punto G', 'Punto H'];
+    return Array.from({ length: count }, (_, index) => ({
+      id: createDeliveryId(),
+      name: names[index] || `Punto ${index + 1}`,
+      x: Math.round(Math.random() * 100),
+      y: Math.round(Math.random() * 100),
+    }));
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     const data = global.RutaExpressData;
     const greedy = global.RutaExpressGreedy;
@@ -33,6 +43,7 @@
       depotCoordinates: document.querySelector('#depot-coordinates'),
       calculateButton: document.querySelector('#calculate-route'),
       resetButton: document.querySelector('#reset-example'),
+      randomizeButton: document.querySelector('#randomize-deliveries'),
       nextButton: document.querySelector('#next-step'),
       svg: document.querySelector('#route-svg'),
       mapStatus: document.querySelector('#map-status'),
@@ -114,6 +125,20 @@
       deliveryManager.showFormError(elements.formError, '');
       elements.form.reset();
       recalculate(false);
+    });
+
+    elements.randomizeButton.addEventListener('click', () => {
+      state.deliveries = generateRandomDeliveries(5);
+      deliveryManager.showFormError(elements.formError, '');
+
+      const driverCount = Math.floor(Math.random() * 4) + 1; // entre 1 y 4
+      elements.driverCountInput.value = driverCount;
+
+      state.plan = greedy.buildGreedyRoute(data.DEPOT, state.deliveries);
+      state.multiRoutes = multiRoute.buildMultiRoute(data.DEPOT, state.deliveries, driverCount);
+      state.mode = 'multi';
+
+      render();
     });
 
     elements.nextButton.addEventListener('click', () => {
