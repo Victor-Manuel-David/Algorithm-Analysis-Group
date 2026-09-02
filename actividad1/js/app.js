@@ -21,6 +21,22 @@
       y: Math.round(Math.random() * 100),
     }));
   }
+  function sliceRoutesToVisibleSteps(routes, totalVisible) {
+    let remaining = totalVisible;
+    return routes.map((route) => {
+      const stepsToShow = Math.max(0, Math.min(route.steps.length, remaining));
+      remaining -= stepsToShow;
+      return {
+        ...route,
+        steps: route.steps.slice(0, stepsToShow),
+        orderedStops: route.orderedStops.slice(0, stepsToShow),
+      };
+    });
+  }
+
+  function countTotalSteps(routes) {
+    return routes.reduce((total, route) => total + route.steps.length, 0);
+  }
 
   document.addEventListener('DOMContentLoaded', () => {
     const data = global.RutaExpressData;
@@ -71,6 +87,7 @@
       visibleSteps: data.SAMPLE_DELIVERIES.length,
       mode: 'single',
       multiRoutes: [],
+      multiVisibleSteps: 0,
     };
 
     function render() {
@@ -83,8 +100,12 @@
       deliveryManager.renderDeliveryList(elements.deliveryList, state.deliveries, removeDelivery);
 
       if (state.mode === 'multi') {
-        visualization.renderMultiRouteMap(elements, data.DEPOT, state.multiRoutes);
-        visualization.renderMultiRouteSteps(elements, state.multiRoutes);
+        const visibleRoutes = sliceRoutesToVisibleSteps(state.multiRoutes, state.multiVisibleSteps);
+        const totalSteps = countTotalSteps(state.multiRoutes);
+
+        visualization.renderMultiRouteMap(elements, data.DEPOT, visibleRoutes);
+        visualization.renderMultiRouteSteps(elements, visibleRoutes);
+        elements.nextButton.hidden = state.multiVisibleSteps >= totalSteps;
       } else {
         visualization.renderRouteMap(elements, data.DEPOT, state.deliveries, state.plan, state.visibleSteps);
         visualization.renderRouteSteps(elements, state.plan, state.visibleSteps);
@@ -92,9 +113,19 @@
     }
 
     function recalculate(showOnlyFirstStep) {
-      state.plan = greedy.buildGreedyRoute(data.DEPOT, state.deliveries);
-      state.visibleSteps = showOnlyFirstStep && state.plan.steps.length > 0 ? 1 : state.plan.steps.length;
-      state.mode = 'single';
+      const driverCount = Number(elements.driverCountInput.value) || 1;
+
+      if (driverCount > 1) {
+        state.multiRoutes = multiRoute.buildMultiRoute(data.DEPOT, state.deliveries, driverCount);
+        const totalSteps = countTotalSteps(state.multiRoutes);
+        state.multiVisibleSteps = showOnlyFirstStep && totalSteps > 0 ? 1 : totalSteps;
+        state.mode = 'multi';
+      } else {
+        state.plan = greedy.buildGreedyRoute(data.DEPOT, state.deliveries);
+        state.visibleSteps = showOnlyFirstStep && state.plan.steps.length > 0 ? 1 : state.plan.steps.length;
+        state.mode = 'single';
+      }
+
       render();
     }
 
@@ -122,6 +153,7 @@
 
     elements.resetButton.addEventListener('click', () => {
       state.deliveries = copySampleDeliveries(data.SAMPLE_DELIVERIES);
+      elements.driverCountInput.value = 1;
       deliveryManager.showFormError(elements.formError, '');
       elements.form.reset();
       recalculate(false);
@@ -129,20 +161,19 @@
 
     elements.randomizeButton.addEventListener('click', () => {
       state.deliveries = generateRandomDeliveries(5);
+      elements.driverCountInput.value = Math.floor(Math.random() * 5) + 1; // entre 1 y 5
       deliveryManager.showFormError(elements.formError, '');
-
-      const driverCount = Math.floor(Math.random() * 4) + 1; // entre 1 y 4
-      elements.driverCountInput.value = driverCount;
-
-      state.plan = greedy.buildGreedyRoute(data.DEPOT, state.deliveries);
-      state.multiRoutes = multiRoute.buildMultiRoute(data.DEPOT, state.deliveries, driverCount);
-      state.mode = 'multi';
-
-      render();
+      recalculate(false);
     });
 
     elements.nextButton.addEventListener('click', () => {
-      if (state.visibleSteps < state.plan.steps.length) {
+      if (state.mode === 'multi') {
+        const totalSteps = countTotalSteps(state.multiRoutes);
+        if (state.multiVisibleSteps < totalSteps) {
+          state.multiVisibleSteps += 1;
+          render();
+        }
+      } else if (state.visibleSteps < state.plan.steps.length) {
         state.visibleSteps += 1;
         render();
       }
