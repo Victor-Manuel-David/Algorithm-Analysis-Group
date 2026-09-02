@@ -15,10 +15,11 @@
   document.addEventListener('DOMContentLoaded', () => {
     const data = global.RutaExpressData;
     const greedy = global.RutaExpressGreedy;
+    const bruteForce = global.RutaExpressBruteForce;
     const deliveryManager = global.RutaExpressDeliveryManager;
     const visualization = global.RutaExpressVisualization;
 
-    if (!data || !greedy || !deliveryManager || !visualization) {
+    if (!data || !greedy || !bruteForce || !deliveryManager || !visualization) {
       throw new Error('No fue posible cargar todos los módulos de RutaExpress.');
     }
 
@@ -39,6 +40,11 @@
       totalCount: document.querySelector('#total-count'),
       steps: document.querySelector('#route-steps'),
       summary: document.querySelector('#route-summary'),
+      compareButton: document.querySelector('#compare-optimal'),
+      comparisonResult: document.querySelector('#comparison-result'),
+      greedyDistance: document.querySelector('#greedy-distance'),
+      optimalDistance: document.querySelector('#optimal-distance'),
+      comparisonSummary: document.querySelector('#comparison-summary'),
     };
 
     const state = {
@@ -98,6 +104,27 @@
         state.visibleSteps += 1;
         render();
       }
+    });
+
+    elements.compareButton.addEventListener('click', () => {
+      const optimal = bruteForce.buildOptimalRoute(data.DEPOT, state.deliveries);
+
+      elements.comparisonResult.hidden = false;
+      elements.greedyDistance.textContent = visualization.formatDistance(state.plan.totalDistance);
+
+      if (!optimal.feasible) {
+        elements.optimalDistance.textContent = '—';
+        elements.comparisonSummary.textContent =
+          `Fuerza bruta desactivada: hay ${state.deliveries.length} entregas y el límite es ${bruteForce.MAX_BRUTE_FORCE_DELIVERIES} (probar todas las rutas posibles tomaría demasiado tiempo).`;
+        return;
+      }
+
+      const difference = state.plan.totalDistance - optimal.totalDistance;
+      elements.optimalDistance.textContent = visualization.formatDistance(optimal.totalDistance);
+      elements.comparisonSummary.textContent =
+        difference <= 0.001
+          ? 'Greedy encontró la ruta óptima en este caso.'
+          : `Greedy recorre ${visualization.formatDistance(difference)} unidades más que la ruta óptima.`;
     });
 
     render();
