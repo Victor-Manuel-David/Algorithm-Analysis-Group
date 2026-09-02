@@ -73,11 +73,11 @@
 
       if (state.mode === 'multi') {
         visualization.renderMultiRouteMap(elements, data.DEPOT, state.multiRoutes);
+        visualization.renderMultiRouteSteps(elements, state.multiRoutes);
       } else {
         visualization.renderRouteMap(elements, data.DEPOT, state.deliveries, state.plan, state.visibleSteps);
+        visualization.renderRouteSteps(elements, state.plan, state.visibleSteps);
       }
-
-      visualization.renderRouteSteps(elements, state.plan, state.visibleSteps);
     }
 
     function recalculate(showOnlyFirstStep) {

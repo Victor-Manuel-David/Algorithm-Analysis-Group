@@ -222,6 +222,8 @@
   }
 
   function renderRouteSteps(elements, plan, visibleSteps) {
+    elements.steps.classList.remove('route-steps-groups');
+    elements.steps.classList.add('route-steps');
     const shownSteps = plan.steps.slice(0, visibleSteps);
     elements.steps.replaceChildren();
     elements.summary.replaceChildren();
@@ -257,10 +259,89 @@
     }
   }
 
+  function createMultiStepItem(step, color) {
+  const item = document.createElement('li');
+  item.className = 'route-step';
+  item.style.borderLeft = `4px solid ${color}`;
+
+  const content = document.createElement('div');
+  content.className = 'step-content';
+
+  const number = document.createElement('span');
+  number.className = 'step-number';
+  number.style.background = color;
+  number.textContent = step.number;
+
+  const description = document.createElement('div');
+  description.className = 'step-description';
+
+  const route = document.createElement('div');
+  route.className = 'step-route';
+
+  const origin = document.createElement('span');
+  origin.textContent = step.from.name;
+
+  const arrow = document.createElement('span');
+  arrow.className = 'step-arrow';
+  arrow.setAttribute('aria-hidden', 'true');
+  arrow.style.color = color;
+  arrow.textContent = '→';
+
+  const destination = document.createElement('span');
+  destination.textContent = step.to.name;
+
+  const explanation = document.createElement('p');
+  explanation.textContent = `Elige la entrega pendiente más cercana: ${formatDistance(step.distance)} unidades.`;
+
+  route.append(origin, arrow, destination);
+  description.append(route, explanation);
+  content.append(number, description);
+  item.append(content);
+  return item;
+}
+
+function renderMultiRouteSteps(elements, routes) {
+  elements.steps.classList.remove('route-steps');
+  elements.steps.classList.add('route-steps-groups');
+  elements.steps.replaceChildren();
+  elements.summary.replaceChildren();
+
+  routes.forEach((route, index) => {
+    const color = DRIVER_COLORS[index % DRIVER_COLORS.length];
+
+    const group = document.createElement('li');
+    group.className = 'route-driver-group';
+
+    const header = document.createElement('h3');
+    header.className = 'route-driver-header';
+    header.style.color = color;
+    header.textContent = `Repartidor ${route.driver}`;
+    group.append(header);
+
+    if (route.steps.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'empty-steps';
+      empty.textContent = 'Sin entregas asignadas.';
+      group.append(empty);
+    } else {
+      const list = document.createElement('ol');
+      list.className = 'route-steps';
+      route.steps.forEach((step) => list.append(createMultiStepItem(step, color)));
+      group.append(list);
+    }
+
+    elements.steps.append(group);
+  });
+
+  elements.nextButton.hidden = true;
+}
+
   global.RutaExpressVisualization = Object.freeze({
     formatDistance,
     renderRouteMap,
     renderRouteSteps,
     renderMultiRouteMap,
+    renderMultiRouteSteps,
+    DRIVER_COLORS,
   });
 })(window);
