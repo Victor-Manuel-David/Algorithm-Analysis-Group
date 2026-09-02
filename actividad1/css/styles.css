@@ -625,6 +625,21 @@ button:disabled {
   background: rgba(248, 245, 238, 0.55);
 }
 
+.route-steps-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.route-driver-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .step-content {
   display: flex;
   align-items: flex-start;
@@ -813,10 +828,6 @@ button:disabled {
     height: 265px;
   }
 
-  .route-steps {
-    grid-template-columns: 1fr;
-  }
-
   .site-footer {
     flex-direction: column;
   }
@@ -831,4 +842,12 @@ button:disabled {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  .route-driver-header {
+  margin: 6px 0 -2px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
 }
