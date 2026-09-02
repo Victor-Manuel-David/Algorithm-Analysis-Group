@@ -332,8 +332,6 @@ function renderMultiRouteSteps(elements, routes) {
 
     elements.steps.append(group);
   });
-
-  elements.nextButton.hidden = true;
 }
 
   global.RutaExpressVisualization = Object.freeze({
