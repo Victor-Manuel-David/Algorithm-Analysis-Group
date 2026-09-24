@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="CampusPath encuentra la ruta más corta entre edificios de un campus mediante el algoritmo de Dijkstra."
+    />
+    <title>CampusPath | Rutas más cortas con Dijkstra</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230d1528'/%3E%3Cpath d='M16 44 30 18l18 26' fill='none' stroke='%23a7f35a' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='16' cy='44' r='6' fill='%235ce1e6'/%3E%3Ccircle cx='30' cy='18' r='6' fill='%235ce1e6'/%3E%3Ccircle cx='48' cy='44' r='6' fill='%235ce1e6'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+    <script src="js/graph-data.js" defer></script>
+    <script src="js/dijkstra.js" defer></script>
+    <script src="js/route-controls.js" defer></script>
+    <script src="js/graph-visualization.js" defer></script>
+    <script src="js/app.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#workspace" aria-label="Ir al planificador CampusPath">
+        <span class="brand-mark" aria-hidden="true">
+          <i></i><i></i><i></i>
+        </span>
+        <span>
+          <strong>CampusPath</strong>
+          <small>Rutas más cortas en el campus</small>
+        </span>
+      </a>
+      <span class="algorithm-badge">Grafo ponderado · Dijkstra</span>
+    </header>
+
+    <main id="workspace" class="workspace">
+      <section class="workspace-heading" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Proyecto 02 · Algoritmos de grafos</p>
+          <h1 id="page-title">¿Cuál es el camino más rápido?</h1>
+        </div>
+        <p>
+          Selecciona dos lugares. Cada conexión muestra su tiempo en minutos y Dijkstra encuentra
+          el recorrido con el menor costo acumulado.
+        </p>
+      </section>
+
+      <section class="control-panel" aria-label="Selección de ruta">
+        <label for="start-node">
+          Punto de partida
+          <select id="start-node"></select>
+        </label>
+        <button id="swap-route" class="swap-button" type="button" aria-label="Intercambiar origen y destino">⇄</button>
+        <label for="end-node">
+          Destino
+          <select id="end-node"></select>
+        </label>
+        <button id="calculate-route" class="primary-button" type="button">
+          Calcular ruta mínima
+        </button>
+        <p id="route-error" class="route-error" role="alert" aria-live="polite"></p>
+      </section>
+
+      <section class="dashboard">
+        <article class="graph-card card">
+          <div class="card-heading">
+            <div>
+              <p class="eyebrow">Grafo del campus</p>
+              <h2>Nodos, aristas y pesos</h2>
+            </div>
+            <div class="legend" aria-label="Leyenda del grafo">
+              <span><i class="legend-node"></i> Lugar</span>
+              <span><i class="legend-route"></i> Ruta mínima</span>
+            </div>
+          </div>
+
+          <figure class="graph-stage" aria-label="Mapa del campus representado como grafo ponderado">
+            <svg id="graph-svg" viewBox="0 0 100 100" aria-hidden="true"></svg>
+            <figcaption>
+              <span id="graph-status">Selecciona un origen y un destino.</span>
+              <span id="graph-size">0 nodos · 0 conexiones</span>
+            </figcaption>
+          </figure>
+        </article>
+
+        <aside class="side-column">
+          <article class="result-card card">
+            <div class="card-heading compact">
+              <div>
+                <p class="eyebrow">Resultado</p>
+                <h2>Ruta encontrada</h2>
+              </div>
+              <span id="result-state" class="state-pill">Esperando</span>
+            </div>
+
+            <div id="empty-result" class="empty-state">
+              <span aria-hidden="true">⌖</span>
+              <p>Calcula una ruta para conocer el camino y su duración.</p>
+            </div>
+
+            <div id="route-result" hidden>
+              <div class="result-metrics">
+                <div>
+                  <small>Tiempo mínimo</small>
+                  <strong><span id="total-cost">0</span> min</strong>
+                </div>
+                <div>
+                  <small>Lugares visitados</small>
+                  <strong id="path-node-count">0</strong>
+                </div>
+              </div>
+              <ol id="path-list" class="path-list" aria-label="Camino más corto"></ol>
+            </div>
+          </article>
+
+          <article class="rule-card">
+            <p class="eyebrow light">La decisión de Dijkstra</p>
+            <h2>Visitar el nodo no resuelto con menor distancia</h2>
+            <code>distancia nueva = distancia actual + peso de la conexión</code>
+            <p>
+              Si la nueva distancia es menor que la registrada, el algoritmo la actualiza y guarda
+              el nodo anterior.
+            </p>
+          </article>
+        </aside>
+      </section>
+
+      <section class="iterations-card card" aria-labelledby="iterations-title">
+        <div class="card-heading iterations-heading">
+          <div>
+            <p class="eyebrow">Evidencia del algoritmo</p>
+            <h2 id="iterations-title">Iteraciones de Dijkstra</h2>
+          </div>
+          <div class="iteration-actions">
+            <span id="iteration-counter">0 / 0</span>
+            <button id="next-iteration" class="secondary-button" type="button" disabled>
+              Mostrar siguiente iteración
+            </button>
+          </div>
+        </div>
+
+        <div id="iteration-empty" class="iteration-empty">
+          Aquí aparecerán el nodo elegido, las distancias evaluadas y las actualizaciones realizadas.
+        </div>
+
+        <div id="iteration-content" hidden>
+          <div class="iteration-summary">
+            <span>Iteración <strong id="iteration-number">0</strong></span>
+            <span>Nodo seleccionado: <strong id="selected-node">—</strong></span>
+            <span>Distancia acumulada: <strong id="selected-distance">—</strong></span>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Lugar</th>
+                  <th>Distancia conocida</th>
+                  <th>Anterior</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="distance-table"></tbody>
+            </table>
+          </div>
+          <p id="iteration-note" class="iteration-note"></p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>CampusPath · Proyecto educativo de análisis de algoritmos</span>
+      <span>Dijkstra requiere pesos no negativos.</span>
+    </footer>
+  </body>
+</html>
