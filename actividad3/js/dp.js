@@ -102,18 +102,58 @@
 
     // Reconstrucción hacia atrás: ¿qué decisión produjo dp[n]?
     const seleccionadas = [];
+    const traza = []; // recorrido de la reconstrucción, para animarlo en la UI
     let i = n;
     while (i > 0) {
       if (ordenadas[i - 1].peso + dp[p[i]] > dp[i - 1]) {
         seleccionadas.push(ordenadas[i - 1]);
+        traza.push({ i, toma: true, siguiente: p[i] });
         i = p[i]; // saltar a la última charla compatible
       } else {
+        traza.push({ i, toma: false, siguiente: i - 1 });
         i -= 1;
       }
     }
     seleccionadas.reverse();
 
-    return { ordenadas, p, dp, pasos, seleccionadas, total: dp[n] };
+    return { ordenadas, p, dp, pasos, traza, seleccionadas, total: dp[n] };
+  }
+
+  /**
+   * MISMA RECURRENCIA, versión top-down (recursión + memoización).
+   * opt(j) = 0 si j = 0;  max(opt(j-1), peso[j] + opt(p(j))) si j > 0.
+   * Cuenta las llamadas para mostrar que cada subproblema se resuelve una sola vez.
+   */
+  function agendaMemo(actividades) {
+    actividades.forEach(validar);
+    const ordenadas = ordenarPorFin(actividades);
+    const p = calcularP(ordenadas);
+    const memo = new Map();
+    let llamadas = 0;
+
+    function opt(j) {
+      llamadas++;
+      if (j === 0) return 0;                 // caso base
+      if (memo.has(j)) return memo.get(j);   // subproblema ya resuelto
+      const valor = Math.max(opt(j - 1), ordenadas[j - 1].peso + opt(p[j]));
+      memo.set(j, valor);
+      return valor;
+    }
+
+    const total = opt(ordenadas.length);
+    return { total, llamadas, subproblemas: memo.size + 1 };
+  }
+
+  /**
+   * Cuántas llamadas haría la recursión SIN memoización:
+   * L(0) = 1,  L(j) = 1 + L(j-1) + L(p(j)).
+   * Se calcula con la propia recurrencia (sin ejecutarla), porque crece exponencialmente.
+   */
+  function llamadasSinMemo(actividades) {
+    const p = calcularP(ordenarPorFin(actividades));
+    const L = [1];
+    for (let j = 1; j < p.length; j++) L[j] = 1 + L[j - 1] + L[p[j]];
+    return L[p.length - 1];
   }
 
   /**
@@ -147,5 +187,8 @@
 
   function sumar(lista) { return lista.reduce((s, a) => s + a.peso, 0); }
 
-  return { aMinutos, aHHMM, validar, ordenarPorFin, calcularP, agendaOptima, vorazPorFin, vorazPorPeso };
+  return {
+    aMinutos, aHHMM, validar, ordenarPorFin, calcularP,
+    agendaOptima, agendaMemo, llamadasSinMemo, vorazPorFin, vorazPorPeso,
+  };
 });

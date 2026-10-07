@@ -48,7 +48,23 @@ const original = [act("B", "10:00", "11:00", 1), act("A", "08:00", "09:00", 1)];
 DP.agendaOptima(original);
 assert.strictEqual(original[0].nombre, "B");
 
-// 9) VERIFICACIÓN CONTRA FUERZA BRUTA (2^n) con datos pseudoaleatorios
+// 9) Top-down con memoización = bottom-up, y cada subproblema se calcula una vez
+r = DP.agendaMemo(peq);
+assert.strictEqual(r.total, 10);
+assert.strictEqual(r.subproblemas, peq.length + 1);
+assert.ok(r.llamadas <= 2 * peq.length + 1);
+
+// 10) Recursión sin memoización: L(0)=1, L(j)=1+L(j-1)+L(p(j)); con p = [0,0,0,1,2]
+//     L = [1, 3, 5, 9, 15]
+assert.strictEqual(DP.llamadasSinMemo(peq), 15);
+assert.strictEqual(DP.llamadasSinMemo([]), 1);
+
+// 11) Traza de reconstrucción coherente con la selección
+r = DP.agendaOptima(peq);
+assert.deepStrictEqual(r.traza.filter((t) => t.toma).length, r.seleccionadas.length);
+assert.strictEqual(r.traza[r.traza.length - 1].siguiente, 0);
+
+// 12) VERIFICACIÓN CONTRA FUERZA BRUTA (2^n) con datos pseudoaleatorios
 function fuerzaBruta(lista) {
   let mejor = 0;
   for (let mask = 0; mask < 1 << lista.length; mask++) {
@@ -68,6 +84,7 @@ for (let t = 0; t < 300; t++) {
   });
   const res = DP.agendaOptima(lista);
   assert.strictEqual(res.total, fuerzaBruta(lista), "DP distinto de fuerza bruta");
+  assert.strictEqual(DP.agendaMemo(lista).total, res.total, "top-down distinto de bottom-up");
   // la selección reconstruida no tiene cruces y suma el total
   const sel = res.seleccionadas;
   for (let i = 1; i < sel.length; i++) assert.ok(sel[i].inicio >= sel[i - 1].fin);
