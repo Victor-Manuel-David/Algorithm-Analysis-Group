@@ -3,13 +3,6 @@
 Proyecto web de **Análisis de Algoritmos (Examen 3)** que elige las charlas de un
 auditorio que **maximizan el número de asistentes**, usando **Programación Dinámica**.
 
-## 👥 Integrantes
-| Integrante | Aporte principal |
-|---|---|
-| Integrante 1 – _nombre_ | Algoritmo de Programación Dinámica, pruebas y explicación formal |
-| Integrante 2 – _nombre_ | Interfaz web, tabla DP y demostración |
-| Integrante 3 – _nombre_ | Arquitectura, README y guion de sustentación |
-
 ## 🎥 Video de sustentación
 > **Enlace:** _pegar aquí el link del video (YouTube / Drive / archivo en el repo)_
 
