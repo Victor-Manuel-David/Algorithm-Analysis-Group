@@ -7,71 +7,243 @@
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  <header>
-    <h1>📅 Agenda Óptima</h1>
-    <p>Elige las charlas de un auditorio que <strong>maximizan los asistentes</strong> usando <strong>Programación Dinámica</strong>.</p>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="marca" href="#problema"><span class="logo">dp</span> Agenda Óptima</a>
+      <nav class="nav" aria-label="Secciones">
+        <a href="#problema">Problema</a>
+        <a href="#modelo">Modelo DP</a>
+        <a href="#datos">Datos</a>
+        <a href="#visualizador">Paso a paso</a>
+        <a href="#resultados">Resultados</a>
+        <a href="#codigo">Código</a>
+      </nav>
+      <button id="btn-tema" class="icono" type="button" title="Cambiar tema" aria-label="Cambiar tema">◐</button>
+    </div>
   </header>
 
   <main>
-    <section class="card">
-      <h2>1. Charlas propuestas</h2>
-      <form id="form-actividad" autocomplete="off">
-        <input id="nombre" type="text" placeholder="Nombre de la charla" required />
-        <label>Inicio <input id="inicio" type="time" required /></label>
-        <label>Fin <input id="fin" type="time" required /></label>
-        <label>Asistentes <input id="peso" type="number" min="0" step="1" required /></label>
-        <button type="submit">Agregar</button>
-      </form>
-      <p id="error" class="error" role="alert"></p>
-
-      <div class="acciones">
-        <button id="btn-ejemplo" type="button" class="secundario">Cargar ejemplo</button>
-        <button id="btn-limpiar" type="button" class="secundario">Limpiar</button>
+    <!-- 1. PROBLEMA -->
+    <section id="problema" class="hero">
+      <div>
+        <p class="eyebrow">Análisis de Algoritmos · Examen 3 · Programación Dinámica</p>
+        <h1>¿Qué charlas programar en un auditorio para tener la <span class="resalta">mayor asistencia</span>?</h1>
+        <p class="lead">
+          Un congreso tiene <strong>un solo auditorio</strong> y muchas charlas propuestas. Cada una tiene
+          hora de inicio, hora de fin y asistentes esperados. Las que se cruzan no pueden darse juntas.
+          Probar todas las combinaciones cuesta <code>O(2ⁿ)</code>; con <strong>Programación Dinámica</strong>
+          (<em>Weighted Interval Scheduling</em>) se resuelve en <code>O(n log n)</code>.
+        </p>
+        <div class="hero-acciones">
+          <a class="btn" href="#datos">Probar el algoritmo</a>
+          <a class="btn fantasma" href="#modelo">Ver el modelo</a>
+        </div>
       </div>
-
-      <table>
-        <thead><tr><th>Charla</th><th>Inicio</th><th>Fin</th><th>Asistentes</th><th></th></tr></thead>
-        <tbody id="tabla-actividades"></tbody>
-      </table>
-      <p id="vacio" class="nota">Aún no hay charlas. Agrega una o carga el ejemplo.</p>
+      <aside class="tarjeta contraejemplo">
+        <h3>¿Por qué no basta un algoritmo voraz?</h3>
+        <div class="mini-gantt" aria-hidden="true">
+          <div class="mg-fila"><span>A · 10</span><div class="mg-pista"><i class="mg-barra voraz" style="left:0;width:50%"></i></div></div>
+          <div class="mg-fila"><span>B · 10</span><div class="mg-pista"><i class="mg-barra voraz" style="left:50%;width:50%"></i></div></div>
+          <div class="mg-fila"><span>Grande · 100</span><div class="mg-pista"><i class="mg-barra optimo" style="left:0;width:100%"></i></div></div>
+          <div class="mg-eje"><span>08:00</span><span>09:00</span><span>10:00</span></div>
+        </div>
+        <p>El voraz por hora de fin elige <strong>A + B = 20</strong>. El óptimo es <strong>Grande = 100</strong>.
+          La DP compara <em>tomar</em> vs. <em>no tomar</em> en cada paso, reutilizando subproblemas.</p>
+      </aside>
     </section>
 
-    <section class="card">
-      <h2>2. Resolver</h2>
-      <button id="btn-resolver" type="button">Ejecutar Programación Dinámica</button>
+    <!-- 2. MODELO -->
+    <section id="modelo" class="seccion">
+      <header class="seccion-cab">
+        <span class="num">1</span>
+        <div><h2>Modelo de Programación Dinámica</h2>
+        <p>Primero se ordenan las charlas por hora de fin y se numeran <code>1..n</code>.</p></div>
+      </header>
+      <div class="modelo-grid">
+        <article class="tarjeta concepto">
+          <span class="etq">Estado / subproblema</span>
+          <p class="formula">dp[i]</p>
+          <p>Máximo de asistentes usando <strong>solo las primeras <em>i</em> charlas</strong>.</p>
+        </article>
+        <article class="tarjeta concepto">
+          <span class="etq">Caso base</span>
+          <p class="formula">dp[0] = 0</p>
+          <p>Sin charlas no hay asistentes. Es el punto de partida de la tabla.</p>
+        </article>
+        <article class="tarjeta concepto ancho">
+          <span class="etq">Relación de recurrencia</span>
+          <p class="formula">dp[i] = max( <span class="c-no">dp[i−1]</span> , <span class="c-si">w<sub>i</sub> + dp[p(i)]</span> )</p>
+          <p><span class="c-no">No tomar</span> la charla <em>i</em> (queda lo mejor de las anteriores) o
+            <span class="c-si">tomarla</span> (sus asistentes + lo mejor compatible).
+            <code>p(i)</code> = cuántas charlas terminan antes de que empiece la <em>i</em> (búsqueda binaria).</p>
+        </article>
+        <article class="tarjeta concepto">
+          <span class="etq">Respuesta</span>
+          <p class="formula">dp[n]</p>
+          <p>Las charlas elegidas se reconstruyen recorriendo la tabla de <code>n</code> hacia atrás.</p>
+        </article>
+        <article class="tarjeta concepto">
+          <span class="etq">Complejidad</span>
+          <p class="formula">O(n log n)</p>
+          <p>Ordenar + calcular <code>p(i)</code>; llenar la tabla es <code>O(n)</code>. Espacio <code>O(n)</code>.</p>
+        </article>
+      </div>
+    </section>
 
-      <div id="resultado" hidden>
-        <p id="resumen" class="resumen"></p>
+    <!-- 3. DATOS -->
+    <section id="datos" class="seccion">
+      <header class="seccion-cab">
+        <span class="num">2</span>
+        <div><h2>Charlas propuestas</h2>
+        <p>Agrega charlas o carga un conjunto de prueba.</p></div>
+      </header>
 
-        <h3>Definición del problema (DP)</h3>
-        <ul class="formulas">
-          <li><strong>Estado:</strong> <code>dp[i]</code> = máximo de asistentes usando solo las primeras <em>i</em> charlas (ordenadas por hora de fin).</li>
-          <li><strong>Caso base:</strong> <code>dp[0] = 0</code>.</li>
-          <li><strong>Recurrencia:</strong> <code>dp[i] = max( dp[i-1] , asistentes[i] + dp[p(i)] )</code>, con <code>p(i)</code> = última charla que termina antes de que empiece la <em>i</em>.</li>
-        </ul>
-
-        <h3>Tabla de Programación Dinámica</h3>
-        <div class="scroll">
-          <table id="tabla-dp">
-            <thead>
-              <tr><th>i</th><th>Charla</th><th>p(i)</th><th>No tomar<br><small>dp[i-1]</small></th><th>Tomar<br><small>asist + dp[p(i)]</small></th><th>dp[i]</th><th>Decisión</th></tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+      <div class="tarjeta">
+        <div class="presets">
+          <button id="btn-ejemplo" type="button" class="chip-btn">Congreso de ejemplo</button>
+          <button id="btn-trampa" type="button" class="chip-btn">Contraejemplo voraz</button>
+          <button id="btn-aleatorio" type="button" class="chip-btn">Aleatorio</button>
+          <button id="btn-limpiar" type="button" class="chip-btn peligro">Limpiar</button>
         </div>
 
-        <h3>Agenda óptima</h3>
-        <div id="linea-tiempo" class="timeline"></div>
-        <p class="leyenda"><span class="chip ok"></span> Seleccionada &nbsp; <span class="chip no"></span> Descartada</p>
+        <form id="form-actividad" class="form" autocomplete="off">
+          <label class="campo crece">Nombre<input id="nombre" type="text" placeholder="Ej. Machine Learning" required /></label>
+          <label class="campo">Inicio<input id="inicio" type="time" required /></label>
+          <label class="campo">Fin<input id="fin" type="time" required /></label>
+          <label class="campo">Asistentes<input id="peso" type="number" min="0" step="1" required /></label>
+          <button type="submit" class="btn">Agregar</button>
+        </form>
+        <p id="error" class="error" role="alert"></p>
 
-        <h3>Comparación con algoritmos voraces</h3>
-        <div id="comparacion" class="comparacion"></div>
-        <p id="comparacion-nota" class="nota"></p>
+        <div class="scroll">
+          <table class="tabla">
+            <thead><tr><th>Charla</th><th>Inicio</th><th>Fin</th><th class="der">Asistentes</th><th></th></tr></thead>
+            <tbody id="tabla-actividades"></tbody>
+          </table>
+        </div>
+        <p id="vacio" class="vacio">Aún no hay charlas. Agrega una o carga un conjunto de prueba.</p>
+
+        <div class="cta">
+          <span id="contador" class="nota"></span>
+          <button id="btn-resolver" type="button" class="btn grande">Ejecutar Programación Dinámica →</button>
+        </div>
       </div>
+    </section>
+
+    <div id="resultado" hidden>
+      <!-- 4. VISUALIZADOR -->
+      <section id="visualizador" class="seccion">
+        <header class="seccion-cab">
+          <span class="num">3</span>
+          <div><h2>Ejecución paso a paso</h2>
+          <p>Así se llena la tabla <code>dp</code> y luego se reconstruye la agenda. Usa ← → del teclado.</p></div>
+        </header>
+
+        <div class="tarjeta">
+          <div class="controles">
+            <div class="grupo-botones">
+              <button id="v-inicio" class="icono" type="button" title="Inicio">⏮</button>
+              <button id="v-prev" class="icono" type="button" title="Paso anterior">◀</button>
+              <button id="v-play" class="btn" type="button">▶ Reproducir</button>
+              <button id="v-next" class="icono" type="button" title="Paso siguiente">▶</button>
+              <button id="v-fin" class="icono" type="button" title="Final">⏭</button>
+            </div>
+            <label class="velocidad">Velocidad <input id="v-vel" type="range" min="200" max="2000" step="100" value="1100" /></label>
+            <span id="v-contador" class="nota"></span>
+          </div>
+          <div class="progreso"><div id="v-barra"></div></div>
+
+          <div class="fase"><span id="v-fase" class="pill"></span><p id="v-texto"></p></div>
+
+          <div class="explica">
+            <div id="v-formula" class="formula-viva"></div>
+          </div>
+
+          <h4 class="sub">Tabla <code>dp</code></h4>
+          <div class="scroll"><div id="v-celdas" class="celdas"></div></div>
+
+          <h4 class="sub">Charlas ordenadas por hora de fin</h4>
+          <div id="v-gantt" class="gantt"></div>
+          <div class="leyenda" id="v-leyenda"></div>
+        </div>
+
+        <details class="tarjeta plegable">
+          <summary>Tabla completa de Programación Dinámica</summary>
+          <div class="scroll">
+            <table id="tabla-dp" class="tabla dp">
+              <thead>
+                <tr><th>i</th><th>Charla</th><th>p(i)</th><th class="der">No tomar<br><small>dp[i−1]</small></th><th class="der">Tomar<br><small>w + dp[p(i)]</small></th><th class="der">dp[i]</th><th>Decisión</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="nota">Haz clic en una fila para ir a ese paso.</p>
+        </details>
+      </section>
+
+      <!-- 5. RESULTADOS -->
+      <section id="resultados" class="seccion">
+        <header class="seccion-cab">
+          <span class="num">4</span>
+          <div><h2>Resultados</h2>
+          <p id="resumen"></p></div>
+        </header>
+
+        <div class="kpis" id="kpis"></div>
+
+        <div class="tarjeta">
+          <h3>Agenda óptima</h3>
+          <div id="linea-tiempo" class="gantt"></div>
+          <div class="leyenda">
+            <span><i class="mk sel"></i> Seleccionada</span><span><i class="mk desc"></i> Descartada</span>
+          </div>
+        </div>
+
+        <div class="dos-col">
+          <div class="tarjeta">
+            <h3>Comparación con algoritmos voraces</h3>
+            <div id="comparacion" class="barras"></div>
+            <p id="comparacion-nota" class="nota"></p>
+          </div>
+          <div class="tarjeta">
+            <h3>¿Cuánto trabajo ahorra la DP?</h3>
+            <div id="ahorro" class="barras"></div>
+            <p class="nota">La recursión sin memoria vuelve a resolver los mismos <code>dp[j]</code> muchas veces
+              (subproblemas solapados). Guardándolos, cada uno se calcula una sola vez. Escala logarítmica.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 6. CÓDIGO -->
+    <section id="codigo" class="seccion">
+      <header class="seccion-cab">
+        <span class="num">5</span>
+        <div><h2>Implementación</h2>
+        <p>Núcleo de <code>js/dp.js</code> (bottom-up). También se incluye la versión top-down con memoización.</p></div>
+      </header>
+      <pre class="codigo"><code><span class="cm">// Ordenar por hora de fin y calcular p(i) con búsqueda binaria — O(n log n)</span>
+<span class="kw">const</span> ordenadas = ordenarPorFin(actividades);
+<span class="kw">const</span> p = calcularP(ordenadas);
+
+<span class="kw">const</span> dp = <span class="kw">new</span> Array(n + <span class="nu">1</span>).fill(<span class="nu">0</span>);   <span class="cm">// dp[0] = 0  → caso base</span>
+<span class="kw">for</span> (<span class="kw">let</span> i = <span class="nu">1</span>; i &lt;= n; i++) {
+  <span class="kw">const</span> sinTomar = dp[i - <span class="nu">1</span>];                       <span class="cm">// no tomar la charla i</span>
+  <span class="kw">const</span> tomando  = ordenadas[i - <span class="nu">1</span>].peso + dp[p[i]];  <span class="cm">// tomarla</span>
+  dp[i] = Math.max(sinTomar, tomando);                <span class="cm">// recurrencia</span>
+}
+
+<span class="cm">// Reconstrucción: de n hacia atrás</span>
+<span class="kw">let</span> i = n;
+<span class="kw">while</span> (i &gt; <span class="nu">0</span>) {
+  <span class="kw">if</span> (ordenadas[i - <span class="nu">1</span>].peso + dp[p[i]] &gt; dp[i - <span class="nu">1</span>]) { seleccionadas.push(ordenadas[i - <span class="nu">1</span>]); i = p[i]; }
+  <span class="kw">else</span> i -= <span class="nu">1</span>;
+}
+<span class="kw">return</span> dp[n];</code></pre>
     </section>
   </main>
 
-  <footer>Proyecto de Análisis de Algoritmos · Ver README.md para la explicación completa</footer>
+  <footer>Proyecto de Análisis de Algoritmos · Programación Dinámica · Ver <code>README.md</code> para la explicación completa</footer>
 
   <script src="js/dp.js"></script>
   <script src="js/app.js"></script>
