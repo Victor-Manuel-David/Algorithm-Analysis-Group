@@ -1,0 +1,10 @@
+{
+  "name": "agenda-dp",
+  "version": "1.0.0",
+  "description": "Agenda óptima de charlas con Programación Dinámica (Weighted Interval Scheduling)",
+  "scripts": {
+    "test": "node tests/dp.test.js",
+    "start": "python3 -m http.server 8000"
+  },
+  "license": "MIT"
+}
