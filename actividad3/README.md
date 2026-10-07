@@ -16,11 +16,18 @@ en horario y no pueden darse al mismo tiempo.
 Probar todas las combinaciones cuesta O(2ⁿ). Con Programación Dinámica se resuelve en O(n log n).
 
 ## 2. Solución
-Una aplicación web donde el usuario ingresa charlas (o carga un ejemplo), ejecuta el
-algoritmo y ve:
-- la **tabla de Programación Dinámica** paso a paso (decisión *tomar / no tomar* en cada fila),
-- la **agenda óptima** en una línea de tiempo,
-- una **comparación** con dos algoritmos voraces que no siempre son óptimos.
+Una aplicación web donde el usuario ingresa charlas (o carga un conjunto de prueba:
+congreso de ejemplo, contraejemplo de los voraces o datos aleatorios), ejecuta el algoritmo y ve:
+- el **modelo de DP** (estado, caso base, recurrencia, respuesta y complejidad) explicado en la página,
+- un **visualizador paso a paso** (con reproducción automática y teclado ← →) que muestra cómo se
+  llena cada celda `dp[i]`, de qué celdas depende (`dp[i-1]` y `dp[p(i)]`), qué charlas son
+  compatibles o se cruzan, y luego la **reconstrucción** hacia atrás de la agenda,
+- la **tabla de Programación Dinámica** completa (clic en una fila para ir a ese paso),
+- la **agenda óptima** en un diagrama de Gantt con eje de horas,
+- una **comparación** con dos algoritmos voraces que no siempre son óptimos,
+- **cuánto trabajo ahorra la DP**: subconjuntos de fuerza bruta vs. llamadas de la recursión sin
+  memoización vs. con memoización vs. celdas de la tabla bottom-up,
+- el **código** del núcleo del algoritmo. Incluye tema claro/oscuro y diseño adaptable a móvil.
 
 ## 3. Algoritmo seleccionado: Programación Dinámica (bottom-up)
 
@@ -50,6 +57,13 @@ La respuesta es `dp[n]`. Para saber **qué** charlas se eligieron se recorre la 
 ### Complejidad
 **O(n log n)** tiempo (ordenar + búsqueda binaria + llenar la tabla) y **O(n)** espacio.
 
+### Bottom-up y top-down
+La implementación principal (`agendaOptima`) llena la tabla de `dp[0]` a `dp[n]` (bottom-up).
+También se incluye `agendaMemo`, la misma recurrencia escrita como recursión con memoización
+(top-down). Sin memoización, la recursión haría `L(j) = 1 + L(j-1) + L(p(j))` llamadas, que
+crece exponencialmente porque los mismos subproblemas se repiten; con memoización cada `dp[j]`
+se calcula una sola vez.
+
 ### ¿Por qué no un algoritmo voraz?
 Con pesos, la decisión local falla: dos charlas de 10 asistentes (08–09 y 09–10) suman 20,
 pero una charla de 100 asistentes (08–10) es mejor. La DP compara ambas opciones en cada paso.
@@ -71,19 +85,19 @@ Detalle en [`docs/arquitectura.md`](docs/arquitectura.md).
 ├── js/dp.js              # algoritmo de Programación Dinámica
 ├── js/app.js             # interfaz
 ├── tests/dp.test.js
-├── docs/                 # algoritmo, arquitectura, guion, commits
+├── docs/                 # algoritmo y arquitectura
 ├── package.json
 └── README.md
 ```
 
 ## 6. Cómo ejecutarlo
-**Opción A (más simple):** abrir `index.html` en el navegador.
-
-**Opción B (servidor local):**
+**Opción A (servidor local, recomendada):**
 ```bash
 npm start            # o: python3 -m http.server 8000
-# abrir http://localhost:8000
+# abre http://127.0.0.1:8000
 ```
+
+**Opción B:** abrir `index.html` directamente en el navegador.
 
 **Pruebas automáticas (requiere Node.js):**
 ```bash
@@ -99,13 +113,19 @@ Con el ejemplo incluido (11 charlas):
 | Voraz por hora de fin | 550 | 6 |
 | Voraz por más asistentes | 560 | 3 |
 
-Las pruebas verifican la DP contra **fuerza bruta en 300 casos aleatorios**, además de
-casos borde: lista vacía, una charla, charlas consecutivas, validaciones y contraejemplos de los voraces.
+Trabajo realizado en el mismo ejemplo:
+
+| Enfoque | Trabajo |
+|---|---|
+| Fuerza bruta | 2¹¹ = 2.048 subconjuntos |
+| Recursión sin memoización | 359 llamadas |
+| Top-down con memoización | 23 llamadas |
+| Bottom-up (tabla) | 12 celdas (`dp[0..11]`) |
+
+Las pruebas verifican la DP contra **fuerza bruta en 300 casos aleatorios** (y que top-down
+y bottom-up coinciden), además de casos borde: lista vacía, una charla, charlas consecutivas,
+validaciones, conteo de llamadas y contraejemplos de los voraces.
 
 ## 8. Limitaciones y mejoras
 - Un solo auditorio (con varios, el problema se complica).
-- Mejora posible: visualizar el árbol de recursión sin memoización para mostrar el ahorro.
-
-## 9. Sustentación
-Guion dividido entre los 3 integrantes: [`docs/guion-sustentacion.md`](docs/guion-sustentacion.md).
-Estrategia de commits: [`docs/estrategia-commits.md`](docs/estrategia-commits.md).
+- Las horas se manejan dentro de un mismo día (no hay charlas que pasen la medianoche).

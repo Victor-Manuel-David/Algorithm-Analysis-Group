@@ -73,6 +73,17 @@ Respuesta: `dp[4] = 10` (charlas A y C). Esta tabla es exactamente la que muestr
 | Reconstruir la solución | O(n) |
 | **Total** | **O(n log n)** tiempo, **O(n)** espacio |
 
+## Top-down vs. bottom-up
+La misma recurrencia se puede escribir como recursión:
+```
+opt(0) = 0
+opt(j) = max( opt(j-1), w[j] + opt(p(j)) )
+```
+Sin guardar resultados, el número de llamadas es `L(0) = 1`, `L(j) = 1 + L(j-1) + L(p(j))`,
+que crece exponencialmente (en el ejemplo pequeño: L = 1, 3, 5, 9, 15). Con memoización
+(`agendaMemo`) cada `opt(j)` se calcula una sola vez. La versión bottom-up (`agendaOptima`)
+evita la recursión llenando la tabla en orden `dp[0], dp[1], …, dp[n]`.
+
 ## Verificación
 `npm test` compara el resultado de la DP contra una solución de **fuerza bruta (2ⁿ)** en
 300 casos aleatorios, y comprueba que la DP nunca es peor que los algoritmos voraces.
