@@ -4,7 +4,7 @@ Proyecto web de **Análisis de Algoritmos (Examen 3)** que elige las charlas de 
 auditorio que **maximizan el número de asistentes**, usando **Programación Dinámica**.
 
 ## 🎥 Video de sustentación
-> **Enlace:** _pegar aquí el link del video (YouTube / Drive / archivo en el repo)_
+https://www.youtube.com/watch?v=nN35wBedY38 
 
 ## 1. Problema planteado
 Un congreso tiene **un solo auditorio** y varias charlas propuestas. Cada charla tiene
