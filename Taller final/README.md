@@ -12,6 +12,7 @@
 ## 215. Kth Largest Element in an Array
 
 Enlace: https://leetcode.com/problems/kth-largest-element-in-an-array/  
+Código:  
 **Autor:** Eric David Florez Vasquez (`David04042003`)  
 **Familia:** heap  
 **Idea:** Se mantiene un min-heap de tamaño exactamente `k`. Al recorrer el arreglo, si el heap aún no está lleno se inserta; si el nuevo valor es mayor que la raíz, se extrae la raíz y se inserta el nuevo. Al final la raíz es el k-ésimo mayor.  
@@ -24,6 +25,7 @@ Enlace: https://leetcode.com/problems/kth-largest-element-in-an-array/
 ## 179. Largest Number
 
 Enlace: https://leetcode.com/problems/largest-number/  
+Código:  
 **Autor:** Eric David Florez Vasquez (`David04042003`)  
 **Familia:** ordenamiento (clave)  
 **Idea:** Se convierten los números a cadenas y se ordenan con un comparador que decide el orden según la concatenación: `a` va antes que `b` si `a + b > b + a`. Luego se unen las cadenas. Si el resultado empieza por cero se devuelve `"0"`.  
@@ -36,6 +38,7 @@ Enlace: https://leetcode.com/problems/largest-number/
 ## 743. Network Delay Time
 
 Enlace: https://leetcode.com/problems/network-delay-time/  
+Código: 
 **Autor:** Eric David Florez Vasquez (`David04042003`)  
 **Familia:** grafos (Dijkstra)  
 **Idea:** Se modela el grafo dirigido y ponderado. Se ejecuta Dijkstra desde el nodo `k` usando un min-heap de distancias tentativas. La respuesta es la mayor distancia finita; si algún nodo queda inalcanzable se devuelve `-1`.  
@@ -48,6 +51,7 @@ Enlace: https://leetcode.com/problems/network-delay-time/
 ## 1584. Min Cost to Connect All Points
 
 Enlace: https://leetcode.com/problems/min-cost-to-connect-all-points/  
+Código:  
 **Autor:** Eric David Florez Vasquez (`David04042003`)  
 **Familia:** grafos (MST – Kruskal)  
 **Idea:** Se generan todas las aristas posibles con distancia Manhattan y se ordenan por peso. Con Union-Find se van agregando las aristas más baratas que no forman ciclo hasta conectar los `n` puntos.  
