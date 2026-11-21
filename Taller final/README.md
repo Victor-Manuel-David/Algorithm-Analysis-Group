@@ -51,7 +51,7 @@ Código:
 ## 1584. Min Cost to Connect All Points
 
 Enlace: https://leetcode.com/problems/min-cost-to-connect-all-points/  
-Código:  
+Código: [`Visual-Codigos/1584. Min Cost to Connect All Points.py`](Visual-Codigos/1584. Min Cost to Connect All Points.py) 
 **Autor:** Eric David Florez Vasquez (`David04042003`)  
 **Familia:** grafos (MST – Kruskal)  
 **Idea:** Se generan todas las aristas posibles con distancia Manhattan y se ordenan por peso. Con Union-Find se van agregando las aristas más baratas que no forman ciclo hasta conectar los `n` puntos.  
